@@ -11,6 +11,7 @@ import courseRouter from './routes/courseRoute.js'
 
 // Initialize Express
 const app = express()
+const aiRoutes = require('./routes/aiRoutes');
 
 // Connect to database
 await connectDB()
@@ -28,6 +29,10 @@ app.use('/api/educator', express.json(), educatorRouter)
 app.use('/api/course', express.json(), courseRouter)
 app.use('/api/user', express.json(), userRouter)
 
+// Add this with your other route imports
+
+
+app.use('/api/ai', aiRoutes);
 // Port
 const PORT = process.env.PORT || 5000
 
