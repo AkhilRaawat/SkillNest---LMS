@@ -8,3 +8,4 @@ python-docx==0.8.11
 requests==2.31.0
 python-dotenv==1.1.0
 google-generativeai==0.8.5
+fastapi==0.110.0
