@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 class AiService {
   constructor() {
@@ -35,4 +35,4 @@ class AiService {
   }
 }
 
-module.exports = AiService;
+export default AiService;

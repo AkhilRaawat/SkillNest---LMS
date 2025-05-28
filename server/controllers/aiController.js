@@ -1,4 +1,4 @@
-const AiService = require('..services\aiService.js');
+import AiService from '..\services\aiService.js'; 
 
 class AiController {
   constructor() {
@@ -32,4 +32,5 @@ class AiController {
   }
 }
 
-module.exports = new AiController();
+const aiController = new AiController();
+export default aiController;

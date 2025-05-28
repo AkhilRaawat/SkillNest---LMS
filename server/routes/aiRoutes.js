@@ -1,9 +1,9 @@
-const express = require('express');
-const aiController = require('../controllers/aiController');
+import express from 'express';
+import aiController from '../controllers/aiController.js'; // Note the .js extension
 
 const router = express.Router();
 
-router.post('/generate-quiz', aiController.generateQuiz);
-router.get('/health', aiController.healthCheck);
+router.post('/generate-quiz', aiController.generateQuiz.bind(aiController));
+router.get('/health', aiController.healthCheck.bind(aiController));
 
-module.exports = router;
+export default router;
