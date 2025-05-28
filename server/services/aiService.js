@@ -9,7 +9,11 @@ class AiService {
     try {
       const response = await axios.post(`${this.aiServiceUrl}/api/ai/generate-quiz`, {
         content,
-        settings,
+        settings: {
+          question_count: settings.questionCount || 10,
+          difficulty: settings.difficulty || 'medium',
+          question_types: settings.questionTypes || ['mcq']
+        },
         course_id: settings.courseId || 'default',
         user_id: settings.userId || 'default'
       });
