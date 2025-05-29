@@ -49,6 +49,7 @@ const Navbar = () => {
             user && <>
               <button onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
               | <Link to='/my-enrollments' >My Enrollments</Link>
+              | <Link to='/quiz-generator' className="text-blue-600 font-medium hover:text-blue-800">🤖 AI Quiz Generator</Link>
             </>
           }
         </div>
@@ -63,7 +64,10 @@ const Navbar = () => {
         <div className="flex items-center gap-1 sm:gap-2 max-sm:text-xs">
           <button onClick={becomeEducator}>{isEducator ? 'Educator Dashboard' : 'Become Educator'}</button>
           | {
-            user && <Link to='/my-enrollments' >My Enrollments</Link>
+            user && <>
+              <Link to='/my-enrollments' >My Enrollments</Link>
+              | <Link to='/quiz-generator' className="text-blue-600 font-medium">🤖 Quiz</Link>
+            </>
           }
         </div>
         {user
