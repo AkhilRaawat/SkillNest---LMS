@@ -1,4 +1,4 @@
-import AiService from '../services/aiservice.js';// Note the .js extension
+import AiService from '../services/aiService.js';// Note the .js extension
 
 class AiController {
   constructor() {
