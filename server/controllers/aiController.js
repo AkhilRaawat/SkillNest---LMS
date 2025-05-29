@@ -1,4 +1,4 @@
-import AiService from '../services/aiService.js'; // Ensure this matches the exact casing of the file name on disk
+import AiService from '../services/aiservice.js';// Note the .js extension
 
 class AiController {
   constructor() {
