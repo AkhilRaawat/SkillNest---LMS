@@ -8,10 +8,11 @@ import { clerkMiddleware } from '@clerk/express'
 import { clerkWebhooks, stripeWebhooks } from './controllers/webhooks.js'
 import educatorRouter from './routes/educatorRoutes.js'
 import courseRouter from './routes/courseRoute.js'
+import aiRoutes from './routes/aiRoutes.js'
 
 // Initialize Express
 const app = express()
-const aiRoutes = require('./routes/aiRoutes.js');
+
 
 // Connect to database
 await connectDB()
