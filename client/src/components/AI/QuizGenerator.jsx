@@ -13,7 +13,7 @@ const QuizGenerator = () => {
   const [error, setError] = useState('');
   const [quizGenerated, setQuizGenerated] = useState(false);
 
-  const API_BASE_URL = 'https://your-vercel-backend.vercel.app'; // Replace with your actual backend URL
+  const API_BASE_URL = 'https://skill-nest-lms-server.vercel.app'; // Replace with your actual backend URL
 
   const handleGenerate = async () => {
     if (!content.trim()) {
