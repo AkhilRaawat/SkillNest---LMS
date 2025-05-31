@@ -16,6 +16,7 @@ import Player from './pages/student/Player'
 import MyEnrollments from './pages/student/MyEnrollments'
 import Loading from './components/student/Loading'
 import QuizGenerator from './components/AI/QuizGenerator'
+import ChatBot from './components/AI/ChatBot'
 
 const App = () => {
 
@@ -43,6 +44,7 @@ const App = () => {
 
         </Route>
       </Routes>
+      <ChatBot />
     </div>
   )
 }
