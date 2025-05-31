@@ -9,5 +9,5 @@ requests==2.31.0
 python-dotenv==1.1.0
 google-generativeai==0.8.5
 fastapi==0.110.0
-groq==0.4.1
+groq==0.10.0
 pymongo==4.6.0
