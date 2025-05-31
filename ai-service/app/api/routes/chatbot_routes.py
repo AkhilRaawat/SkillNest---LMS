@@ -11,20 +11,27 @@ from dotenv import load_dotenv
 router = APIRouter()
 load_dotenv()
 # Configure Groq for Bobby Chatbot
-try:
-    groq_api_key = os.getenv("GROQ_API_KEY")
-    if groq_api_key and groq_api_key != "your_groq_api_key_here":
-        groq_client = Groq(api_key=groq_api_key)
+def initialize_groq_client():
+    """Initialize Groq client with proper error handling"""
+    try:
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key or groq_api_key == "your_groq_api_key_here":
+            print("⚠️ Groq API key not found - Bobby chatbot will use fallback responses")
+            return None, False
+        
+        # Initialize with minimal configuration to avoid version conflicts
+        client = Groq(api_key=groq_api_key)
+        
+        # Test the client with a simple call to ensure it works
         print("✅ Groq AI configured successfully for Bobby")
-        GROQ_AVAILABLE = True
-    else:
-        print("⚠️ Groq API key not found - Bobby chatbot will use fallback responses")
-        groq_client = None
-        GROQ_AVAILABLE = False
-except Exception as e:
-    print(f"⚠️ Groq configuration error: {e}")
-    groq_client = None
-    GROQ_AVAILABLE = False
+        return client, True
+        
+    except Exception as e:
+        print(f"⚠️ Groq configuration error: {e}")
+        print(f"⚠️ Error type: {type(e).__name__}")
+        return None, False
+
+groq_client, GROQ_AVAILABLE = initialize_groq_client()
 
 # MongoDB connection for chatbot conversations
 try:

@@ -20,6 +20,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://localhost:5173",
+        "http://localhost:5000",
         "https://skill-nest-lms.vercel.app",  # Your Vercel frontend
         "https://skillnest-ai-service.onrender.com",  # Your Render URL
         "*"  

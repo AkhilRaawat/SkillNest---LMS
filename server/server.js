@@ -9,6 +9,8 @@ import { clerkWebhooks, stripeWebhooks } from './controllers/webhooks.js'
 import educatorRouter from './routes/educatorRoutes.js'
 import courseRouter from './routes/courseRoute.js'
 import aiRoutes from './routes/aiRoutes.js'
+import chatbotRouter from './routes/chatbotRoutes.js'
+import { chatbotRateLimit, validateChatRequest, logChatbotRequest, handleChatbotError } from './middlewares/chatbotMiddleware.js'
 
 // Initialize Express
 const app = express()
@@ -34,17 +36,33 @@ app.use(clerkMiddleware())
 
 // Routes
 app.get('/', (req, res) => res.send("API Working"))
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    message: 'LMS API is running successfully',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: 'connected',
+      ai_service: process.env.AI_SERVICE_URL ? 'configured' : 'not_configured',
+      chatbot: 'available'
+    }
+  })
+})
+
 app.post('/clerk', express.json() , clerkWebhooks)
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks)
 app.use('/api/educator', express.json(), educatorRouter)
 app.use('/api/course', express.json(), courseRouter)
 app.use('/api/user', express.json(), userRouter)
-
-// Add this with your other route imports
-
-
+app.use('/api/chatbot', express.json(), chatbotRouter)
 app.use('/api/ai', aiRoutes);
-// Port
+
+if (!process.env.AI_SERVICE_URL) {
+  console.warn('⚠️ AI_SERVICE_URL not set. Bobby chatbot may not work properly.')
+}
+
 const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
