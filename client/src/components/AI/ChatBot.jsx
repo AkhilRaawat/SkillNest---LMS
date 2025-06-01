@@ -13,14 +13,14 @@ const ChatBot = () => {
   const inputRef = useRef(null);  // Get backend URL from environment
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
   
-  // Always use the backend URL (production)
-  const apiBaseUrl = backendUrl;
+  // For development, use proxy; for production, use full URL
+  const apiBaseUrl = import.meta.env.DEV ? '' : backendUrl;
 
   // Debug: Log the backend URL being used
   useEffect(() => {
     console.log('🔗 ChatBot using backend URL:', backendUrl);
     console.log('🔗 ChatBot API base URL:', apiBaseUrl);
-    console.log('🔗 Using production backend');
+    console.log('🔗 Is development mode:', import.meta.env.DEV);
   }, []);
 
   // Auto-scroll to bottom when new messages arrive
@@ -44,7 +44,7 @@ const ChatBot = () => {
     }
   }, [isOpen]);  const loadConversationHistory = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}/api/chatbot/history/${sessionId}`);
+      const response = await fetch(`${backendUrl}/api/chatbot/history/${sessionId}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -86,7 +86,7 @@ const ChatBot = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);    try {
-      const response = await fetch(`${apiBaseUrl}/api/chatbot/chat`, {
+      const response = await fetch(`${backendUrl}/api/chatbot/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,9 +126,10 @@ const ChatBot = () => {
     } finally {
       setIsLoading(false);
     }
-  };  const clearConversation = async () => {
+  };
+  const clearConversation = async () => {
     try {
-      await fetch(`${apiBaseUrl}/api/chatbot/conversation/${sessionId}`, {
+      await fetch(`${backendUrl}/api/chatbot/conversation/${sessionId}`, {
         method: 'DELETE'
       });
       setMessages([{

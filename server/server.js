@@ -26,7 +26,9 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://skill-nest-lms.vercel.app' // Add your frontend URL here
+    'https://skill-nest-lms.vercel.app',
+    "https://skillnest-lms.tech", 
+    'https://www.skillnest-lms.tech' // Add your frontend URL here
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
