@@ -8,11 +8,10 @@ const Navbar = ({ bgColor }) => {
 
   const { isEducator } = useContext(AppContext)
   const { user } = useUser()
-
   return isEducator && user && (
-    <div className={`flex items-center justify-between px-4 md:px-8 border-b border-gray-500 py-3 ${bgColor}`}>
+    <div className={`flex items-center justify-between px-4 md:px-8 border-b border-gray-500 py-5 ${bgColor}`}>
       <Link to="/">
-        <img src={assets.logo} alt="Logo" className="w-28 lg:w-32" />
+        <img src={assets.logo} alt="Logo" className="logo-png logo-png-navbar" />
       </Link>
       <div className="flex items-center gap-5 text-gray-500 relative">
         <p>Hi! {user.fullName}</p>

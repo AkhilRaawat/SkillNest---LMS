@@ -1,5 +1,6 @@
-import logo from './logo.svg'
-import logo_dark from './logo_dark.svg'
+// Using SVG logo from public folder
+const logo = '/final.svg'
+const logo_dark = '/final.svg' // Using same SVG for both light and dark modes
 import search_icon from './search_icon.svg'
 import cross_icon from './cross_icon.svg'
 import upload_area from './upload_area.svg'

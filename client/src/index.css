@@ -41,3 +41,32 @@
 .rich-text ul { margin-left: 30px; list-style-type: disc; }
 
 .rich-text li { margin-bottom: 8px; }
+
+/* Logo styling for PNG with background blending */
+.logo-png {
+  mix-blend-mode: multiply;
+  filter: brightness(1.1) contrast(1.1);
+  background: transparent;
+}
+
+.logo-png-navbar {
+  width: 80px !important; /* Much bigger logo */
+  height: auto;
+  max-height: 60px; /* Increased max height */
+  object-fit: contain;
+}
+
+.logo-png-footer {
+  width: 120px !important;
+  height: auto;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.logo-png-footer-dark {
+  filter: brightness(0) invert(1); /* Make logo white for dark background */
+  width: 140px !important;
+  height: auto;
+  max-height: 45px;
+  object-fit: contain;
+}
