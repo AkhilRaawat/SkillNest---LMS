@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  
   "dependencies": {
     "@clerk/clerk-react": "^5.17.1",
     "axios": "^1.7.8",
