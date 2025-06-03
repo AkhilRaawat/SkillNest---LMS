@@ -15,27 +15,33 @@ import videoAiRouter from './routes/videoAiRoutes.js'
 
 // Initialize Express
 const app = express()
-app.use(express.json());
-
 
 // Connect to database
 await connectDB()
 await connectCloudinary()
 
-// Middlewares
+// CORS Middleware
 app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
     'https://skill-nest-lms.vercel.app',
     "https://skillnest-lms.tech", 
-    'https://www.skillnest-lms.tech' // Add your frontend URL here
+    'https://www.skillnest-lms.tech'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }))
+
+// Clerk middleware
 app.use(clerkMiddleware())
+
+// Routes that need raw body (BEFORE express.json())
+app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks)
+
+// JSON middleware for all other routes
+app.use(express.json());
 
 // Routes
 app.get('/', (req, res) => res.send("API Working"))
@@ -54,14 +60,14 @@ app.get('/api/health', (req, res) => {
   })
 })
 
-app.post('/clerk', express.json() , clerkWebhooks)
-app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks)
-app.use('/api/educator', express.json(), educatorRouter)
-app.use('/api/course', express.json(), courseRouter)
-app.use('/api/user', express.json(), userRouter)
-app.use('/api/chatbot', express.json(), chatbotRouter)
+// Other routes (these will use express.json() automatically)
+app.post('/clerk', clerkWebhooks)
+app.use('/api/educator', educatorRouter)
+app.use('/api/course', courseRouter)
+app.use('/api/user', userRouter)
+app.use('/api/chatbot', chatbotRouter)
 app.use('/api/ai', aiRoutes);
-app.use('/api/video-ai', express.json(), videoAiRouter)
+app.use('/api/video-ai', videoAiRouter)
 
 if (!process.env.AI_SERVICE_URL) {
   console.warn('⚠️ AI_SERVICE_URL not set. Bobby chatbot may not work properly.')
