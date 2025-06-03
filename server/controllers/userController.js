@@ -161,39 +161,6 @@ export const getUserCourseProgress = async (req, res) => {
 
 }
 // Add this to your existing file
-export const handleStripeWebhook = async (req, res) => {
-    try {
-        const sig = req.headers['stripe-signature'];
-        const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-        
-        let event = stripeInstance.webhooks.constructEvent(
-            req.body, 
-            sig, 
-            process.env.STRIPE_WEBHOOK_SECRET
-        );
-
-        if (event.type === 'checkout.session.completed') {
-            const session = event.data.object;
-            const purchaseId = session.metadata.purchaseId;
-            
-            const purchase = await Purchase.findById(purchaseId);
-            
-            if (purchase) {
-                await User.findByIdAndUpdate(
-                    purchase.userId,
-                    { $addToSet: { enrolledCourses: purchase.courseId } }
-                );
-                
-                purchase.status = 'completed';
-                await purchase.save();
-            }
-        }
-
-        res.json({ received: true });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
 
 // Add User Ratings to Course
 export const addUserRating = async (req, res) => {
