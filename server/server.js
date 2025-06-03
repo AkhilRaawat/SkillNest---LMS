@@ -35,7 +35,13 @@ app.use(cors({
 }))
 
 // Clerk middleware
-app.use(clerkMiddleware())
+app.use((req, res, next) => {
+  // Skip clerk middleware for webhook endpoints that need raw body
+  if (req.path === '/stripe') {
+    return next();
+  }
+  return clerkMiddleware()(req, res, next);
+});
 
 // Routes that need raw body (BEFORE express.json())
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks)

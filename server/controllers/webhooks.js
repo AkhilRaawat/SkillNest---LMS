@@ -70,26 +70,66 @@ const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
 
 
 // Stripe Webhooks to Manage Payments Action
+// Enhanced version of your stripeWebhooks function with debugging
 export const stripeWebhooks = async (request, response) => {
   console.log('🔔 Stripe webhook received');
+  
+  // Debug information
+  console.log('📋 Request details:');
+  console.log('- Content-Type:', request.get('content-type'));
+  console.log('- Body type:', typeof request.body);
+  console.log('- Body is Buffer:', Buffer.isBuffer(request.body));
+  console.log('- Body length:', request.body ? request.body.length : 'undefined');
+  
   const sig = request.headers['stripe-signature'];
-
+  console.log('- Signature exists:', !!sig);
+  console.log('- Webhook secret exists:', !!process.env.STRIPE_WEBHOOK_SECRET);
+  
   let event;
 
   try {
-    event = stripeInstance.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    // Ensure we have the required components
+    if (!sig) {
+      throw new Error('Missing stripe-signature header');
+    }
+    
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      throw new Error('Missing STRIPE_WEBHOOK_SECRET environment variable');
+    }
+    
+    if (!request.body) {
+      throw new Error('Missing request body');
+    }
+
+    // Construct the event with detailed error handling
+    console.log('🔐 Attempting signature verification...');
+    event = stripeInstance.webhooks.constructEvent(
+      request.body, 
+      sig, 
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
     console.log('✅ Webhook signature verified successfully');
-  }
-  catch (err) {
-    console.error('❌ Webhook signature verification failed:', err.message);
+    
+  } catch (err) {
+    console.error('❌ Webhook signature verification failed:');
+    console.error('- Error message:', err.message);
+    console.error('- Error type:', err.constructor.name);
+    
+    // Additional debugging for common issues
+    if (err.message.includes('No signatures found')) {
+      console.error('🔍 Debug: This usually means the signature header format is wrong');
+      console.error('🔍 Signature header value:', sig);
+    }
+    
     return response.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   console.log(`ℹ️ Processing event: ${event.type}`);
 
-  // Handle the event
+  // Rest of your existing webhook handling code remains the same...
   switch (event.type) {
     case 'payment_intent.succeeded': {
+      // Your existing code here
       try {
         console.log('💰 Processing successful payment...');
         
@@ -131,7 +171,9 @@ export const stripeWebhooks = async (request, response) => {
         if (!userData) {
           throw new Error(`User not found with ID: ${purchaseData.userId}`);
         }
-        console.log(`✅ User found: ${userData.name}`);        // Fetch course data
+        console.log(`✅ User found: ${userData.name}`);
+
+        // Fetch course data
         console.log('🔍 Fetching course data...');
         const courseData = await Course.findById(purchaseData.courseId.toString());
         if (!courseData) {
@@ -232,4 +274,4 @@ export const stripeWebhooks = async (request, response) => {
   // Return a response to acknowledge receipt of the event
   console.log('✅ Webhook processed successfully');
   response.json({ received: true });
-}
+};
