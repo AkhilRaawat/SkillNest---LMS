@@ -50,6 +50,16 @@ export const purchaseCourse = async (req, res) => {
         }
 
         const newPurchase = await Purchase.create(purchaseData)
+         console.log('📚 Adding user to course enrollment...');
+          courseData.enrolledStudents.push(userData._id);
+          await courseData.save();
+          console.log('✅ User added to course enrolled students');
+
+          // Add course to user enrollment
+          console.log('🎓 Adding course to user enrollment...');
+          userData.enrolledCourses.push(courseData._id);
+          await userData.save();
+          console.log('✅ Course added to user enrolled courses');
 
         // Stripe Gateway Initialize
         const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
