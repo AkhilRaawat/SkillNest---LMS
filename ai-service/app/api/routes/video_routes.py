@@ -5,7 +5,7 @@ from app.models.video_models import (
 from app.services.video_ai_services import VideoAIService
 
 # Initialize router and service
-router = APIRouter(prefix="/api/video-ai", tags=["video-ai"])
+router = APIRouter()
 video_ai_service = VideoAIService()
 
 @router.get("/health")
