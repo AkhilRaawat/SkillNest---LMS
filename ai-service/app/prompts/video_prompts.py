@@ -68,15 +68,17 @@ TRANSCRIPT:
 STUDENT QUESTION: {question}
 
 REQUIREMENTS:
+-Do NOT mention "the transcript" in your response.
 - Answer directly and clearly based on the transcript content
 - If the transcript mentions timestamps, include relevant ones
 - If the answer isn't in the transcript, say so honestly
 - Provide additional context when helpful
 - Make the answer educational and comprehensive
+- Pretend that the user is talking to video content, not the transcript directly
 
 FORMAT YOUR RESPONSE AS JSON:
 {{
-    "answer": "Clear, comprehensive answer based on transcript...",
+    "answer": "Clear, comprehensive answer based on video...",
     "relevant_timestamps": ["timestamp1", "timestamp2"],
     "confidence": "high/medium/low",
     "additional_info": "Any extra context or explanations..."

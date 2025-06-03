@@ -11,6 +11,7 @@ import courseRouter from './routes/courseRoute.js'
 import aiRoutes from './routes/aiRoutes.js'
 import chatbotRouter from './routes/chatbotRoutes.js'
 import { chatbotRateLimit, validateChatRequest, logChatbotRequest, handleChatbotError } from './middlewares/chatbotMiddleware.js'
+import videoAiRouter from './routes/videoAiRoutes.js'
 
 // Initialize Express
 const app = express()
@@ -60,6 +61,7 @@ app.use('/api/course', express.json(), courseRouter)
 app.use('/api/user', express.json(), userRouter)
 app.use('/api/chatbot', express.json(), chatbotRouter)
 app.use('/api/ai', aiRoutes);
+app.use('/api/video-ai', express.json(), videoAiRouter)
 
 if (!process.env.AI_SERVICE_URL) {
   console.warn('⚠️ AI_SERVICE_URL not set. Bobby chatbot may not work properly.')
@@ -69,4 +71,5 @@ const PORT = process.env.PORT || 5000
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`🎥 Video AI endpoints available at /api/video-ai/*`);
 })
