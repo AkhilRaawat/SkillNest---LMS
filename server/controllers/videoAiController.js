@@ -240,7 +240,7 @@ export const askQuestion = async (req, res) => {
     });
 
     if (!aiResponse.ok) {
-      throw new Error(`AI service responded with status: ${aiResponse.status}`);
+      throw new Error(`AI service responded with status : ${aiResponse.status}`);
     }
 
     const aiResult = await aiResponse.json();
