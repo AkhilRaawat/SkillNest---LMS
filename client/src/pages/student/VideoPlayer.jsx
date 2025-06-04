@@ -6,6 +6,8 @@ import { assets } from '../../assets/assets';
 import humanizeDuration from 'humanize-duration';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import VideoNotesSummarizer from '../../components/AI/VideoNotesSummarizer';
+import VideoQuestionAnswer from '../../components/AI/VideoQuestionAnswer';
 
 const VideoPlayer = () => {
   const navigate = useNavigate();
@@ -168,26 +170,26 @@ const VideoPlayer = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen">
+      <div className="flex-1 overflow-y-auto">
         {/* Video Section */}
         <div className="bg-black">
           <div className="w-full">
             <CloudinaryVideoPlayer videoUrl={currentLecture.lectureUrl} height="450px" />
           </div>
           {/* Video Info */}
-          <div className="px-4 mt-1">
+          <div className="px-4 py-2">
             <h2 className="text-xs font-medium text-white inline-block mr-2">{currentLecture.lectureTitle}</h2>
             <span className="text-gray-400 text-xs">{currentLecture.chapterTitle}</span>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="flex-1 bg-white border-t border-gray-200 overflow-y-auto">
+        <div className="bg-white border-t border-gray-200">
           {/* Navigation Tabs */}
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('notes')}
-              className={`px-3 py-1.5 text-xs font-medium ${
+              className={`px-6 py-3 text-sm font-medium ${
                 activeTab === 'notes'
                   ? 'border-b-2 border-blue-500 text-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
@@ -252,14 +254,10 @@ const VideoPlayer = () => {
           {/* Content Area */}
           <div className="p-6">
             {activeTab === 'notes' && (
-              <div className="text-center text-gray-500">
-                Notes Summarizer feature coming soon...
-              </div>
+              <VideoNotesSummarizer videoId={currentLecture.lectureId} />
             )}
             {activeTab === 'questions' && (
-              <div className="text-center text-gray-500">
-                Ask Questions feature coming soon...
-              </div>
+              <VideoQuestionAnswer videoId={currentLecture.lectureId} />
             )}
             {activeTab === 'talk' && (
               <div className="text-center text-gray-500">

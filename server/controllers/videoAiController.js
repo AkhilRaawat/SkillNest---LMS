@@ -1,6 +1,7 @@
 import VideoTranscript from '../models/VideoTranscript.js';
 import VideoSummary from '../models/VideoSummary.js';
 import VideoQA from '../models/VideoQA.js';
+import axios from 'axios';
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'https://skillnest-ai-service.onrender.com';
 
@@ -116,102 +117,83 @@ export const getAvailableVideos = async (req, res) => {
   }
 };
 
-// Generate video summary
-export const generateSummary = async (req, res) => {
+// Generate or retrieve video summary
+export const getVideoSummary = async (req, res) => {
   try {
-    const { videoId, summaryType = 'detailed', forceRegenerate = false } = req.body;
-    const userId = req.user?.id || 'anonymous';
-
-    // Get transcript
-    const transcript = await VideoTranscript.findOne({ videoId });
-    if (!transcript) {
-      return res.status(404).json({
-        success: false,
-        message: 'Transcript not found. Available videos: react-hooks-intro, python-data-structures, javascript-async-await'
-      });
-    }
-
-    // Check if summary already exists (unless force regenerate)
-    if (!forceRegenerate) {
-      const existingSummary = await VideoSummary.findOne({
-        videoId,
-        userId,
-        summaryType
-      });
-
-      if (existingSummary) {
-        return res.json({
-          success: true,
-          message: 'Summary retrieved from cache',
-          data: existingSummary,
-          cached: true
+    const { videoId } = req.params;
+    
+    // Check if summary exists in cache
+    let summary = await VideoSummary.findOne({ videoId });
+    
+    if (!summary) {
+      // Get transcript first
+      const transcript = await VideoTranscript.findOne({ videoId });
+      if (!transcript) {
+        return res.status(404).json({
+          success: false,
+          message: 'Transcript not found for this video'
         });
       }
+
+      // Call AI service for summarization
+      const aiResponse = await axios.post(`${AI_SERVICE_URL}/summarize`, {
+        transcript: transcript.transcript
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.AI_SERVICE_KEY}`
+        }
+      });
+
+      // Cache the summary
+      summary = await VideoSummary.create({
+        videoId,
+        summary: aiResponse.data.summary,
+        keyPoints: aiResponse.data.keyPoints
+      });
     }
-
-    // Call AI service for summarization
-    console.log(`🧠 Calling AI service for video ${videoId} summarization...`);
-    
-    const aiResponse = await fetch(`${AI_SERVICE_URL}/api/video-ai/summarize`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        video_id: videoId,
-        transcript: transcript.transcript,
-        summary_type: summaryType
-      })
-    });
-
-    if (!aiResponse.ok) {
-      throw new Error(`AI service responded with status: ${aiResponse.status}`);
-    }
-
-    const aiResult = await aiResponse.json();
-
-    // Save summary to database
-    const newSummary = new VideoSummary({
-      videoId,
-      userId,
-      courseId: transcript.courseId,
-      summaryType,
-      summary: aiResult.summary,
-      keyPoints: aiResult.key_points || [],
-      aiPowered: aiResult.ai_powered || false,
-      generatedAt: new Date(aiResult.generated_at)
-    });
-
-    await newSummary.save();
 
     res.json({
       success: true,
-      message: 'Summary generated successfully',
-      data: newSummary,
-      cached: false
+      data: summary
     });
 
   } catch (error) {
-    console.error('Error generating summary:', error);
+    console.error('Error in getVideoSummary:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to generate summary',
+      message: 'Failed to generate/retrieve video summary',
       error: error.message
     });
   }
 };
 
-// Ask question about video
+// Ask questions about the video
 export const askQuestion = async (req, res) => {
   try {
-    const { videoId, question } = req.body;
-    const userId = req.user?.id || 'anonymous';
+    const { videoId } = req.params;
+    const { question } = req.body;
 
-    // Validate inputs
-    if (!videoId || !question) {
+    if (!question) {
       return res.status(400).json({
         success: false,
-        message: 'videoId and question are required'
+        message: 'Question is required'
+      });
+    }
+
+    // Check if similar question exists
+    const existingQA = await VideoQA.findOne({
+      videoId,
+      question: {
+        $regex: question,
+        $options: 'i'
+      }
+    });
+
+    if (existingQA) {
+      return res.json({
+        success: true,
+        data: existingQA,
+        source: 'cache'
       });
     }
 
@@ -220,56 +202,42 @@ export const askQuestion = async (req, res) => {
     if (!transcript) {
       return res.status(404).json({
         success: false,
-        message: 'Transcript not found. Available videos: react-hooks-intro, python-data-structures, javascript-async-await'
+        message: 'Transcript not found for this video'
       });
     }
 
-    // Call AI service for Q&A
-    console.log(`❓ Calling AI service for video ${videoId} Q&A...`);
-    
-    const aiResponse = await fetch(`${AI_SERVICE_URL}/api/video-ai/ask-question`, {
-      method: 'POST',
+    // Call AI service for answer
+    const aiResponse = await axios.post(`${AI_SERVICE_URL}/ask`, {
+      transcript: transcript.transcript,
+      question
+    }, {
       headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        video_id: videoId,
-        transcript: transcript.transcript,
-        question: question
-      })
+        'Authorization': `Bearer ${process.env.AI_SERVICE_KEY}`
+      }
     });
 
-    if (!aiResponse.ok) {
-      throw new Error(`AI service responded with status : ${aiResponse.status}`);
-    }
-
-    const aiResult = await aiResponse.json();
-
-    // Save Q&A to database
-    const newQA = new VideoQA({
+    // Cache the Q&A
+    const qa = await VideoQA.create({
       videoId,
-      userId,
-      courseId: transcript.courseId,
+      userId: req.user._id, // Assuming you have user info in request
       question,
-      answer: aiResult.answer,
-      relevantTimestamps: aiResult.relevant_timestamps || [],
-      confidence: aiResult.confidence || 'medium',
-      aiPowered: aiResult.ai_powered || false
+      answer: aiResponse.data.answer,
+      relevantTimestamps: aiResponse.data.timestamps,
+      confidence: aiResponse.data.confidence,
+      aiPowered: true
     });
-
-    await newQA.save();
 
     res.json({
       success: true,
-      message: 'Question answered successfully',
-      data: newQA
+      data: qa,
+      source: 'ai'
     });
 
   } catch (error) {
-    console.error('Error answering question:', error);
+    console.error('Error in askQuestion:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to answer question',
+      message: 'Failed to process question',
       error: error.message
     });
   }
