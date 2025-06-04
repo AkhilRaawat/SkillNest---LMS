@@ -2,7 +2,7 @@ import express from 'express';
 import {
   initializeShowcaseData,
   getAvailableVideos,
-  generateSummary,
+  getVideoSummary,
   askQuestion,
   getQuestionHistory,
   getUserSummaries,
@@ -21,8 +21,8 @@ videoAiRouter.post('/initialize-showcase', initializeShowcaseData);
 videoAiRouter.get('/videos', getAvailableVideos);
 
 // AI features
-videoAiRouter.post('/summarize', generateSummary);
-videoAiRouter.post('/ask-question', askQuestion);
+videoAiRouter.post('/summarize/:videoId', getVideoSummary);
+videoAiRouter.post('/ask-question/:videoId', askQuestion);
 
 // User history
 videoAiRouter.get('/questions/:videoId', getQuestionHistory);
