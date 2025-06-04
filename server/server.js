@@ -26,18 +26,22 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:3000',
     'https://skill-nest-lms.vercel.app',
-    'https://skillnest-lms.tech',
-    'https://www.skillnest-lms.tech',
-    'https://skill-nest-lms-server.vercel.app'
+    "https://skillnest-lms.tech", 
+    'https://www.skillnest-lms.tech'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
-  credentials: true,
-  maxAge: 86400 // 24 hours
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }))
 
 // Clerk middleware
-app.use(clerkMiddleware);
+app.use((req, res, next) => {
+  // Skip clerk middleware for webhook endpoints that need raw body
+  if (req.path === '/stripe') {
+    return next();
+  }
+  return clerkMiddleware()(req, res, next);
+});
 
 // Routes that need raw body (BEFORE express.json())
 app.post('/stripe', express.raw({ type: 'application/json' }), stripeWebhooks)
