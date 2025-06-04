@@ -88,20 +88,31 @@ export const purchaseCourse = async (req, res) => {
 
 // Users Enrolled Courses With Lecture Links
 export const userEnrolledCourses = async (req, res) => {
-
     try {
-
-        const userId = req.auth.userId
+        const userId = req.auth.userId;
 
         const userData = await User.findById(userId)
-            .populate('enrolledCourses')
+            .populate({
+                path: 'enrolledCourses',
+                populate: [
+                    { path: 'educator' },
+                    { path: 'courseContent' },
+                    { path: 'courseRatings' }
+                ]
+            });
 
-        res.json({ success: true, enrolledCourses: userData.enrolledCourses })
+        if (!userData) {
+            return res.json({ success: false, message: 'User not found' });
+        }
 
+        if (!userData.enrolledCourses) {
+            return res.json({ success: true, enrolledCourses: [] });
+        }
+
+        res.json({ success: true, enrolledCourses: userData.enrolledCourses });
     } catch (error) {
-        res.json({ success: false, message: error.message })
+        res.json({ success: false, message: error.message });
     }
-
 }
 
 // Update User Course Progress

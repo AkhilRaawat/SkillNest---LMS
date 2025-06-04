@@ -7,61 +7,70 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const Navbar = () => {
-
   const location = useLocation();
-
   const isCoursesListPage = location.pathname.includes('/course-list');
-
-  const { backendUrl, isEducator, setIsEducator, navigate, getToken } = useContext(AppContext)
-
-  const { openSignIn } = useClerk()
-  const { user } = useUser()
+  const { backendUrl, isEducator, setIsEducator, navigate, getToken } = useContext(AppContext);
+  const { openSignIn } = useClerk();
+  const { user } = useUser();
 
   const becomeEducator = async () => {
-
     try {
-
       if (isEducator) {
-        navigate('/educator')
+        navigate('/educator');
         return;
       }
 
-      const token = await getToken()
-      const { data } = await axios.get(backendUrl + '/api/educator/update-role', { headers: { Authorization: `Bearer ${token}` } })
+      const token = await getToken();
+      const { data } = await axios.get(backendUrl + '/api/educator/update-role', { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      
       if (data.success) {
-        toast.success(data.message)
-        setIsEducator(true)
+        toast.success(data.message);
+        setIsEducator(true);
       } else {
-        toast.error(data.message)
-      }    } catch (error) {
-      toast.error(error.message)
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
-  }
+  };
+
   return (
-    <div
-      className={`flex items-center justify-between px-4 sm:px-10  border-b border-gray-500 ${
-        isCoursesListPage ? "bg-white" : "bg-cyan-100/70"
-      }`}
-    >
-      <img
-        onClick={() => navigate("/")}
-        src="SkillNest Final Logo.svg"
-        alt="Logo"
-        className="logo-png  cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out w-[250px] h-[100px] mix-blend-multiply object-cover"
-      />
-      <div className="md:flex hidden items-center gap-5 text-gray-500">
+    <div className={`flex items-center justify-between px-4 sm:px-10 py-2 border-b border-gray-200 ${
+      isCoursesListPage ? "bg-white" : "bg-cyan-100/70"
+    }`}>
+      <Link to="/" className="flex items-center">
+        <img
+          src="SkillNest Final Logo.svg"
+          alt="SkillNest Logo"
+          className="logo-png cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out w-[250px] h-[100px] mix-blend-multiply object-cover"
+        />
+      </Link>
+
+      <div className="md:flex hidden items-center gap-5 text-gray-600">
         <div className="flex items-center gap-5">
           {user && (
             <>
-              <button onClick={becomeEducator}>
+              <button 
+                onClick={becomeEducator}
+                className="hover:text-blue-600 transition-colors"
+              >
                 {isEducator ? "Educator Dashboard" : "Become Educator"}
               </button>
-              | <Link to="/my-enrollments">My Enrollments</Link>|{" "}
+              <span className="text-gray-300">|</span>
+              <Link 
+                to="/my-enrollments"
+                className="hover:text-blue-600 transition-colors"
+              >
+                My Enrollments
+              </Link>
+              <span className="text-gray-300">|</span>
               <Link
                 to="/quiz-generator"
-                className="text-blue-600 font-medium hover:text-blue-800"
+                className="text-blue-600 font-medium hover:text-blue-700 transition-colors flex items-center gap-1"
               >
-                🤖 AI Quiz Generator
+                <span role="img" aria-label="robot">🤖</span> AI Quiz Generator
               </Link>
             </>
           )}
@@ -71,23 +80,36 @@ const Navbar = () => {
         ) : (
           <button
             onClick={() => openSignIn()}
-            className="bg-blue-600 text-white px-5 py-2 rounded-full"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Create Account
           </button>
         )}
       </div>
-      {/* For Phone Screens */}
-      <div className="md:hidden flex items-center gap-2 sm:gap-5 text-gray-500">
+
+      {/* Mobile Menu */}
+      <div className="md:hidden flex items-center gap-2 sm:gap-5 text-gray-600">
         <div className="flex items-center gap-1 sm:gap-2 max-sm:text-xs">
-          <button onClick={becomeEducator}>
+          <button 
+            onClick={becomeEducator}
+            className="hover:text-blue-600 transition-colors"
+          >
             {isEducator ? "Educator Dashboard" : "Become Educator"}
           </button>
-          |{" "}
+          <span className="text-gray-300">|</span>
           {user && (
             <>
-              <Link to="/my-enrollments">My Enrollments</Link>|{" "}
-              <Link to="/quiz-generator" className="text-blue-600 font-medium">
+              <Link 
+                to="/my-enrollments"
+                className="hover:text-blue-600 transition-colors"
+              >
+                My Enrollments
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link 
+                to="/quiz-generator" 
+                className="text-blue-600 font-medium hover:text-blue-700 transition-colors"
+              >
                 🤖 Quiz
               </Link>
             </>
@@ -96,8 +118,11 @@ const Navbar = () => {
         {user ? (
           <UserButton />
         ) : (
-          <button onClick={() => openSignIn()}>
-            <img src={assets.user_icon} alt="" />
+          <button 
+            onClick={() => openSignIn()}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <img src={assets.user_icon} alt="Sign in" className="w-6 h-6" />
           </button>
         )}
       </div>

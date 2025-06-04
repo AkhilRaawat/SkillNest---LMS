@@ -69,18 +69,29 @@ export const AppContextProvider = (props) => {
 
     // Fetch User Enrolled Courses
     const fetchUserEnrolledCourses = async () => {
+        try {
+            if (!user) {
+                return;
+            }
 
-        const token = await getToken();
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Authentication token not available');
+            }
 
-        const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses',
-            { headers: { Authorization: `Bearer ${token}` } })
+            const { data } = await axios.get(backendUrl + '/api/user/enrolled-courses',
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-        if (data.success) {
-            setEnrolledCourses(data.enrolledCourses.reverse())
-        } else (
-            toast.error(data.message)
-        )
-
+            if (data.success) {
+                setEnrolledCourses(data.enrolledCourses.reverse());
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+            setEnrolledCourses([]);
+        }
     }
 
     // Function to Calculate Course Chapter Time
@@ -140,10 +151,13 @@ export const AppContextProvider = (props) => {
     // Fetch User's Data if User is Logged In
     useEffect(() => {
         if (user) {
-            fetchUserData()
-            fetchUserEnrolledCourses()
+            fetchUserData();
+            fetchUserEnrolledCourses();
+        } else {
+            setUserData(null);
+            setEnrolledCourses([]);
         }
-    }, [user])
+    }, [user]);
 
     const value = {
         showLogin, setShowLogin,
