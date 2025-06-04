@@ -1,20 +1,5 @@
 import mongoose from 'mongoose';
 
-const transcriptSegmentSchema = new mongoose.Schema({
-  timestamp: {
-    type: String,
-    required: false
-  },
-  text: {
-    type: String,
-    required: true
-  },
-  speaker: {
-    type: String,
-    required: false
-  }
-}, { _id: false });
-
 const videoTranscriptSchema = new mongoose.Schema({
   videoId: {
     type: String,
@@ -29,34 +14,33 @@ const videoTranscriptSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  transcript: [transcriptSegmentSchema],
+  transcript: [{
+    timestamp: {
+      type: String,
+      required: true
+    },
+    text: {
+      type: String,
+      required: true
+    }
+  }],
   cloudinaryUrl: {
     type: String,
-    required: false
+    required: true
   },
   duration: {
     type: String,
-    required: false
-  },
-  uploadedBy: {
-    type: String,
-    required: false
+    required: true
   },
   createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
     type: Date,
     default: Date.now
   }
 });
 
-// Update the updatedAt field on save
-videoTranscriptSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Indexes for efficient queries
+videoTranscriptSchema.index({ videoId: 1 });
+videoTranscriptSchema.index({ courseId: 1 });
 
 const VideoTranscript = mongoose.model('VideoTranscript', videoTranscriptSchema);
 

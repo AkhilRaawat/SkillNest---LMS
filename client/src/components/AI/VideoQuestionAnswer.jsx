@@ -19,11 +19,18 @@ const VideoQuestionAnswer = ({ videoId }) => {
       setError(null);
 
       const token = await getToken();
-      const { data } = await axios.post(
-        `${backendUrl}/api/video-ai/ask-question`,
-        { videoId, question },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+
+const { data } = await axios.post(
+  `${backendUrl}/api/video-ai/ask-question/${videoId}`,
+  { question }, // request body
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }
+);
+
 
       if (data.success) {
         setRecentQA(data.data);

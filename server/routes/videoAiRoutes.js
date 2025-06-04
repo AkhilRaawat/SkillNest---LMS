@@ -28,4 +28,14 @@ videoAiRouter.post('/ask-question/:videoId', askQuestion);
 videoAiRouter.get('/questions/:videoId', getQuestionHistory);
 videoAiRouter.get('/summaries/:videoId', getUserSummaries);
 
+// Error handling middleware
+videoAiRouter.use((err, req, res, next) => {
+  console.error('Video AI Router Error:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
 export default videoAiRouter;

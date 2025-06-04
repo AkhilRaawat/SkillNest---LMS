@@ -9,24 +9,36 @@ const VideoNotesSummarizer = ({ videoId }) => {
   const [error, setError] = useState(null);
 
   const generateSummary = async () => {
+    if (!videoId) {
+      setError('Video ID is required');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
 
       const token = await getToken();
       const { data } = await axios.post(
-        `${backendUrl}/api/video-ai/summarize`,
-        { videoId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${backendUrl}/api/video-ai/summarize/${videoId}`,{
+            method : 'POST',
+        },
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
       if (data.success) {
         setSummary(data.data);
       } else {
-        setError(data.message);
+        setError(data.message || 'Failed to generate summary');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate summary');
+      console.error('Summary generation error:', err);
+      setError(err.response?.data?.message || 'Failed to generate summary. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -83,28 +95,20 @@ const VideoNotesSummarizer = ({ videoId }) => {
                 {summary.summary}
               </div>
             </div>
-
-            {summary.keyPoints?.length > 0 && (
+            {summary.keyPoints && summary.keyPoints.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                     <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                   </svg>
                   Key Points
-                </h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <ul className="space-y-2">
-                    {summary.keyPoints.map((point, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium mr-3 mt-0.5">
-                          {index + 1}
-                        </span>
-                        <span className="text-gray-700">{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                </h4>
+                <ul className="list-disc list-inside space-y-2 text-gray-700 bg-gray-50 rounded-lg p-4">
+                  {summary.keyPoints.map((point, index) => (
+                    <li key={index} className="ml-2">{point}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>

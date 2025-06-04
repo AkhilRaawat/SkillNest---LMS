@@ -121,9 +121,10 @@ export const getAvailableVideos = async (req, res) => {
 export const getVideoSummary = async (req, res) => {
   try {
     const { videoId } = req.params;
+    const userId = req.auth?.userId || 'anonymous';
     
     // Check if summary exists in cache
-    let summary = await VideoSummary.findOne({ videoId });
+    let summary = await VideoSummary.findOne({ videoId, userId });
     
     if (!summary) {
       // Get transcript first
@@ -136,19 +137,25 @@ export const getVideoSummary = async (req, res) => {
       }
 
       // Call AI service for summarization
-      const aiResponse = await axios.post(`${AI_SERVICE_URL}/summarize`, {
-        transcript: transcript.transcript
-      }, {
-        headers: {
-          'Authorization': `Bearer ${process.env.AI_SERVICE_KEY}`
-        }
+      const aiResponse = await axios.post(`${AI_SERVICE_URL}/api/video-ai/summarize`, {
+        video_id: videoId,
+        transcript: transcript.transcript,
+        summary_type: 'detailed'
       });
+
+      if (!aiResponse.data || !aiResponse.data.summary) {
+        throw new Error('Invalid response from AI service');
+      }
 
       // Cache the summary
       summary = await VideoSummary.create({
         videoId,
+        userId,
+        courseId: transcript.courseId,
         summary: aiResponse.data.summary,
-        keyPoints: aiResponse.data.keyPoints
+        keyPoints: aiResponse.data.key_points || [],
+        summaryType: 'detailed',
+        aiPowered: true
       });
     }
 
@@ -172,6 +179,14 @@ export const askQuestion = async (req, res) => {
   try {
     const { videoId } = req.params;
     const { question } = req.body;
+    const userId = req.auth?.userId || 'anonymous';
+
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Video ID is required'
+      });
+    }
 
     if (!question) {
       return res.status(400).json({
@@ -207,7 +222,8 @@ export const askQuestion = async (req, res) => {
     }
 
     // Call AI service for answer
-    const aiResponse = await axios.post(`${AI_SERVICE_URL}/ask`, {
+    const aiResponse = await axios.post(`${AI_SERVICE_URL}/api/video-ai/ask-question`, {
+      video_id: videoId,
       transcript: transcript.transcript,
       question
     }, {
@@ -219,11 +235,12 @@ export const askQuestion = async (req, res) => {
     // Cache the Q&A
     const qa = await VideoQA.create({
       videoId,
-      userId: req.user._id, // Assuming you have user info in request
+      userId,
+      courseId: transcript.courseId,
       question,
       answer: aiResponse.data.answer,
-      relevantTimestamps: aiResponse.data.timestamps,
-      confidence: aiResponse.data.confidence,
+      relevantTimestamps: aiResponse.data.timestamps || [],
+      confidence: aiResponse.data.confidence || 'medium',
       aiPowered: true
     });
 
