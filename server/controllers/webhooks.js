@@ -72,206 +72,67 @@ const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
 // Stripe Webhooks to Manage Payments Action
 // Enhanced version of your stripeWebhooks function with debugging
 export const stripeWebhooks = async (request, response) => {
-  console.log('🔔 Stripe webhook received');
-  
-  // Debug information
-  console.log('📋 Request details:');
-  console.log('- Content-Type:', request.get('content-type'));
-  console.log('- Body type:', typeof request.body);
-  console.log('- Body is Buffer:', Buffer.isBuffer(request.body));
-  console.log('- Body length:', request.body ? request.body.length : 'undefined');
-  
   const sig = request.headers['stripe-signature'];
-  console.log('- Signature exists:', !!sig);
-  console.log('- Webhook secret exists:', !!process.env.STRIPE_WEBHOOK_SECRET);
-  
+
   let event;
 
   try {
-    // Ensure we have the required components
-    if (!sig) {
-      throw new Error('Missing stripe-signature header');
-    }
-    
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      throw new Error('Missing STRIPE_WEBHOOK_SECRET environment variable');
-    }
-    
-    if (!request.body) {
-      throw new Error('Missing request body');
-    }
-
-    // Construct the event with detailed error handling
-    console.log('🔐 Attempting signature verification...');
-    event = stripeInstance.webhooks.constructEvent(
-      request.body, 
-      sig, 
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-    console.log('✅ Webhook signature verified successfully');
-    
-  } catch (err) {
-    console.error('❌ Webhook signature verification failed:');
-    console.error('- Error message:', err.message);
-    console.error('- Error type:', err.constructor.name);
-    
-    // Additional debugging for common issues
-    if (err.message.includes('No signatures found')) {
-      console.error('🔍 Debug: This usually means the signature header format is wrong');
-      console.error('🔍 Signature header value:', sig);
-    }
-    
-    return response.status(400).send(`Webhook Error: ${err.message}`);
+    event = stripeInstance.webhooks.constructEvent(request.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  }
+  catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  console.log(`ℹ️ Processing event: ${event.type}`);
-
-  // Rest of your existing webhook handling code remains the same...
+  // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded': {
-      // Your existing code here
-      try {
-        console.log('💰 Processing successful payment...');
-        
-        const paymentIntent = event.data.object;
-        const paymentIntentId = paymentIntent.id;
-        console.log(`ℹ️ Payment Intent ID: ${paymentIntentId}`);
 
-        // Getting Session Metadata
-        console.log('🔍 Retrieving checkout session...');
-        const sessions = await stripeInstance.checkout.sessions.list({
-          payment_intent: paymentIntentId,
-        });
+      const paymentIntent = event.data.object;
+      const paymentIntentId = paymentIntent.id;
 
-        if (!sessions.data || sessions.data.length === 0) {
-          throw new Error('No checkout session found for this payment intent');
-        }
+      // Getting Session Metadata
+      const session = await stripeInstance.checkout.sessions.list({
+        payment_intent: paymentIntentId,
+      });
 
-        const session = sessions.data[0];
-        console.log('✅ Checkout session found');
+      const { purchaseId } = session.data[0].metadata;
 
-        if (!session.metadata || !session.metadata.purchaseId) {
-          throw new Error('No purchaseId found in session metadata');
-        }
+      const purchaseData = await Purchase.findById(purchaseId)
+      const userData = await User.findById(purchaseData.userId)
+      const courseData = await Course.findById(purchaseData.courseId.toString())
 
-        const { purchaseId } = session.metadata;
-        console.log(`ℹ️ Purchase ID: ${purchaseId}`);
+      courseData.enrolledStudents.push(userData)
+      await courseData.save()
 
-        // Fetch purchase data
-        console.log('🔍 Fetching purchase data...');
-        const purchaseData = await Purchase.findById(purchaseId);
-        if (!purchaseData) {
-          throw new Error(`Purchase not found with ID: ${purchaseId}`);
-        }
-        console.log('✅ Purchase data found');
+      userData.enrolledCourses.push(courseData._id)
+      await userData.save()
 
-        // Fetch user data
-        console.log('🔍 Fetching user data...');
-        const userData = await User.findById(purchaseData.userId);
-        if (!userData) {
-          throw new Error(`User not found with ID: ${purchaseData.userId}`);
-        }
-        console.log(`✅ User found: ${userData.name}`);
+      purchaseData.status = 'completed'
+      await purchaseData.save()
 
-        // Fetch course data
-        console.log('🔍 Fetching course data...');
-        const courseData = await Course.findById(purchaseData.courseId.toString());
-        if (!courseData) {
-          throw new Error(`Course not found with ID: ${purchaseData.courseId}`);
-        }
-        console.log(`✅ Course found: ${courseData.courseTitle}`);
-
-        // Check if user is already enrolled
-        const isAlreadyEnrolled = userData.enrolledCourses.some(courseId => 
-          courseId.toString() === courseData._id.toString()
-        );
-
-        if (isAlreadyEnrolled) {
-          console.log('⚠️ User is already enrolled in this course');
-        } else {
-          // Add user to course enrollment
-          console.log('📚 Adding user to course enrollment...');
-          courseData.enrolledStudents.push(userData._id);
-          await courseData.save();
-          console.log('✅ User added to course enrolled students');
-
-          // Add course to user enrollment
-          console.log('🎓 Adding course to user enrollment...');
-          userData.enrolledCourses.push(courseData._id);
-          await userData.save();
-          console.log('✅ Course added to user enrolled courses');
-        }
-
-        // Update purchase status
-        console.log('💾 Updating purchase status...');
-        purchaseData.status = 'completed';
-        await purchaseData.save();
-        console.log('✅ Purchase status updated to completed');
-
-        console.log('🎉 Payment processing completed successfully!');
-
-      } catch (error) {
-        console.error('❌ Error processing successful payment:', error.message);
-        console.error('Stack trace:', error.stack);
-        return response.status(500).json({ 
-          received: false, 
-          error: 'Failed to process successful payment',
-          details: error.message 
-        });
-      }
       break;
     }
-
     case 'payment_intent.payment_failed': {
-      try {
-        console.log('💸 Processing failed payment...');
-        
-        const paymentIntent = event.data.object;
-        const paymentIntentId = paymentIntent.id;
-        console.log(`ℹ️ Failed Payment Intent ID: ${paymentIntentId}`);
+      const paymentIntent = event.data.object;
+      const paymentIntentId = paymentIntent.id;
 
-        // Getting Session Metadata
-        const sessions = await stripeInstance.checkout.sessions.list({
-          payment_intent: paymentIntentId,
-        });
+      // Getting Session Metadata
+      const session = await stripeInstance.checkout.sessions.list({
+        payment_intent: paymentIntentId,
+      });
 
-        if (!sessions.data || sessions.data.length === 0) {
-          throw new Error('No checkout session found for this failed payment');
-        }
+      const { purchaseId } = session.data[0].metadata;
 
-        const { purchaseId } = sessions.data[0].metadata;
-        if (!purchaseId) {
-          throw new Error('No purchaseId found in session metadata for failed payment');
-        }
+      const purchaseData = await Purchase.findById(purchaseId)
+      purchaseData.status = 'failed'
+      await purchaseData.save()
 
-        console.log(`ℹ️ Failed Purchase ID: ${purchaseId}`);
-
-        const purchaseData = await Purchase.findById(purchaseId);
-        if (!purchaseData) {
-          throw new Error(`Purchase not found with ID: ${purchaseId}`);
-        }
-
-        purchaseData.status = 'failed';
-        await purchaseData.save();
-        
-        console.log('✅ Failed payment processed - purchase status updated');
-
-      } catch (error) {
-        console.error('❌ Error processing failed payment:', error.message);
-        return response.status(500).json({ 
-          received: false, 
-          error: 'Failed to process failed payment',
-          details: error.message 
-        });
-      }
       break;
     }
-
     default:
-      console.log(`⚠️ Unhandled event type: ${event.type}`);
+      console.log(`Unhandled event type ${event.type}`);
   }
 
   // Return a response to acknowledge receipt of the event
-  console.log('✅ Webhook processed successfully');
   response.json({ received: true });
-};
+}

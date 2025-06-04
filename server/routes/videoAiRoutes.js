@@ -6,7 +6,8 @@ import {
   askQuestion,
   getQuestionHistory,
   getUserSummaries,
-  healthCheck
+  healthCheck,
+  uploadTranscript
 } from '../controllers/videoAiController.js';
 
 const videoAiRouter = express.Router();
@@ -19,6 +20,9 @@ videoAiRouter.post('/initialize-showcase', initializeShowcaseData);
 
 // Get available videos for showcase
 videoAiRouter.get('/videos', getAvailableVideos);
+
+// Upload transcript
+videoAiRouter.post('/upload-transcript', uploadTranscript);
 
 // AI features
 videoAiRouter.post('/summarize/:videoId', getVideoSummary);

@@ -6,8 +6,8 @@ import connectCloudinary from './configs/cloudinary.js'
 import userRouter from './routes/userRoutes.js'
 import { clerkMiddleware } from '@clerk/express'
 import { clerkWebhooks, stripeWebhooks } from './controllers/webhooks.js'
-import educatorRouter from './routes/educatorRoutes.js'
-import courseRouter from './routes/courseRoute.js'
+import educatorRouter from './routes/educatorRouter.js'
+import courseRouter from './routes/courseRouter.js'
 import aiRoutes from './routes/aiRoutes.js'
 import chatbotRouter from './routes/chatbotRoutes.js'
 import { chatbotRateLimit, validateChatRequest, logChatbotRequest, handleChatbotError } from './middlewares/chatbotMiddleware.js'
@@ -79,7 +79,7 @@ if (!process.env.AI_SERVICE_URL) {
   console.warn('⚠️ AI_SERVICE_URL not set. Bobby chatbot may not work properly.')
 }
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 8000
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

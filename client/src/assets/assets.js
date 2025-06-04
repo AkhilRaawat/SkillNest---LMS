@@ -1,6 +1,6 @@
 // Using SVG logo from public folder
-const logo = '/final.svg'
-const logo_dark = '/final.svg' // Using same SVG for both light and dark modes
+const logo = '/SkillNest Final Logo.svg'
+const logo_dark = '/SkillNest Final Logo.svg' // Using same SVG for both light and dark modes
 import search_icon from './search_icon.svg'
 import cross_icon from './cross_icon.svg'
 import upload_area from './upload_area.svg'
@@ -94,25 +94,25 @@ export const assets = {
 
 export const dummyTestimonial = [
     {
-        name: 'Donald Jackman',
-        role: 'SWE 1 @ Amazon',
+        name: 'Sarah Chen',
+        role: 'Full Stack Developer @ Microsoft',
         image: assets.profile_img_1,
         rating: 5,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        feedback: 'SkillNest\'s web development courses transformed my career. The hands-on projects and expert guidance helped me land my dream job at Microsoft. The interactive learning experience and comprehensive curriculum sets them apart from other platforms.',
     },
     {
-        name: 'Richard Nelson',
-        role: 'SWE 2 @ Samsung',
+        name: 'Michael Rodriguez',
+        role: 'Data Scientist @ Google',
         image: assets.profile_img_2,
-        rating: 4,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        rating: 5,
+        feedback: 'The Data Science and AI courses on SkillNest are exceptional. The practical approach, real-world datasets, and industry-focused content helped me transition from a business analyst to a data scientist. The AI-powered quiz generator is a game-changer for learning.',
     },
     {
-        name: 'James Washington',
-        role: 'SWE 2 @ Google',
+        name: 'Emily Thompson',
+        role: 'UX Designer @ Adobe',
         image: assets.profile_img_3,
-        rating: 4.5,
-        feedback: 'I\'ve been using Imagify for nearly two years, primarily for Instagram, and it has been incredibly user-friendly, making my work much easier.',
+        rating: 5,
+        feedback: 'As someone who switched careers into tech, SkillNest\'s UI/UX design courses were invaluable. The step-by-step tutorials, design principles, and portfolio projects gave me the confidence to pursue a career in design. The community support is amazing!',
     },
 ];
 

@@ -167,12 +167,31 @@ const CourseDetails = () => {
           </div>
         </div>
 
-        <div className="max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]">
-          {
-            playerData
-              ? <YouTube videoId={playerData.videoId} opts={{ playerVars: { autoplay: 1 } }} iframeClassName='w-full aspect-video' />
-              : <img src={courseData.courseThumbnail} alt="" />
-          }
+        <div className="max-w-course-card z-10 shadow-custom-card rounded-xl overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]">
+          <div className="relative">
+            {playerData ? (
+              <YouTube 
+                videoId={playerData.videoId} 
+                opts={{ 
+                  playerVars: { 
+                    autoplay: 1,
+                    modestbranding: 1,
+                    rel: 0
+                  } 
+                }} 
+                iframeClassName="w-full aspect-video" 
+              />
+            ) : (
+              <div className="relative aspect-video overflow-hidden bg-gray-100">
+                <img 
+                  src={courseData.courseThumbnail} 
+                  alt={courseData.courseTitle}
+                  className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              </div>
+            )}
+          </div>
           <div className="p-5">
             <div className="flex items-center gap-2">
               <img className="w-3.5" src={assets.time_left_clock_icon} alt="time left clock icon" />

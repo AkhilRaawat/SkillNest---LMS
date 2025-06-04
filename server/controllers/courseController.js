@@ -42,4 +42,35 @@ export const getCourseId = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 
+}
+
+// Delete Course by Id
+export const deleteCourse = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const course = await Course.findById(id);
+        
+        if (!course) {
+            return res.json({ success: false, message: 'Course not found' });
+        }
+
+        // Check if the course has any enrolled students
+        if (course.enrolledStudents && course.enrolledStudents.length > 0) {
+            return res.json({ 
+                success: false, 
+                message: 'Cannot delete course with enrolled students' 
+            });
+        }
+
+        await Course.findByIdAndDelete(id);
+        
+        res.json({ 
+            success: true, 
+            message: 'Course deleted successfully' 
+        });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
 } 

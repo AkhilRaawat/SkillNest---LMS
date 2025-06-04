@@ -350,3 +350,62 @@ export const healthCheck = async (req, res) => {
     });
   }
 };
+
+// Upload a new video transcript
+export const uploadTranscript = async (req, res) => {
+  try {
+    const { videoId, courseId, title, transcript, cloudinaryUrl, duration } = req.body;
+
+    // Validate required fields
+    if (!videoId || !courseId || !title || !transcript || !cloudinaryUrl || !duration) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields. Please provide videoId, courseId, title, transcript, cloudinaryUrl, and duration.'
+      });
+    }
+
+    // Validate transcript format
+    if (!Array.isArray(transcript) || transcript.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Transcript must be a non-empty array of segments with timestamp and text.'
+      });
+    }
+
+    // Check if transcript already exists
+    const existingTranscript = await VideoTranscript.findOne({ videoId });
+    if (existingTranscript) {
+      return res.status(409).json({
+        success: false,
+        message: 'A transcript for this video already exists.',
+        transcriptId: existingTranscript._id
+      });
+    }
+
+    // Create new transcript
+    const newTranscript = await VideoTranscript.create({
+      videoId,
+      courseId,
+      title,
+      transcript,
+      cloudinaryUrl,
+      duration
+    });
+
+    console.log(`✅ Uploaded transcript: ${title}`);
+
+    res.status(201).json({
+      success: true,
+      message: 'Transcript uploaded successfully',
+      data: newTranscript
+    });
+
+  } catch (error) {
+    console.error('Error uploading transcript:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload transcript',
+      error: error.message
+    });
+  }
+};

@@ -26,6 +26,25 @@ const MyCourses = () => {
 
   }
 
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      const token = await getToken();
+      const { data } = await axios.delete(`${backendUrl}/api/course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        // Refresh the courses list
+        fetchEducatorCourses();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     if (isEducator) {
       fetchEducatorCourses()
@@ -44,6 +63,7 @@ const MyCourses = () => {
                 <th className="px-4 py-3 font-semibold truncate">Earnings</th>
                 <th className="px-4 py-3 font-semibold truncate">Students</th>
                 <th className="px-4 py-3 font-semibold truncate">Published On</th>
+                <th className="px-4 py-3 font-semibold truncate">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm text-gray-500">
@@ -57,6 +77,20 @@ const MyCourses = () => {
                   <td className="px-4 py-3">{course.enrolledStudents.length}</td>
                   <td className="px-4 py-3">
                     {new Date(course.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    {course.enrolledStudents.length === 0 && (
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this course?')) {
+                            handleDeleteCourse(course._id);
+                          }
+                        }}
+                        className="px-3 py-1 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
