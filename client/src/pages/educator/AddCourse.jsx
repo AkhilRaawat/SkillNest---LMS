@@ -68,6 +68,18 @@ const AddCourse = () => {
   };
 
   const addLecture = () => {
+    // Basic validation
+    if (!lectureDetails.lectureTitle || !lectureDetails.lectureDuration || !lectureDetails.lectureUrl) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    // Validate Cloudinary URL format
+    if (!lectureDetails.lectureUrl.includes('cloudinary.com')) {
+      toast.error('Please provide a valid Cloudinary video URL');
+      return;
+    }
+
     setChapters(
       chapters.map((chapter) => {
         if (chapter.chapterId === currentChapterId) {

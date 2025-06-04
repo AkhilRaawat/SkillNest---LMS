@@ -17,6 +17,7 @@ import MyEnrollments from './pages/student/MyEnrollments'
 import Loading from './components/student/Loading'
 import QuizGenerator from './components/AI/QuizGenerator'
 import ChatBot from './components/AI/ChatBot'
+import VideoPlayer from './pages/student/VideoPlayer'
 
 const App = () => {
 
@@ -34,6 +35,7 @@ const App = () => {
         <Route path="/course-list/:input" element={<CoursesList />} />
         <Route path="/my-enrollments" element={<MyEnrollments />} />
         <Route path="/player/:courseId" element={<Player />} />
+        <Route path="/watch/:courseId/:lectureId" element={<VideoPlayer />} />
         <Route path="/loading/:path" element={<Loading />} />
         <Route path="/quiz-generator" element={<QuizGenerator />} />
         <Route path='/educator' element={<Educator />}>
@@ -41,7 +43,6 @@ const App = () => {
           <Route path='add-course' element={<AddCourse />} />
           <Route path='my-courses' element={<MyCourses />} />
           <Route path='student-enrolled' element={<StudentsEnrolled />} />
-
         </Route>
       </Routes>
       <ChatBot />

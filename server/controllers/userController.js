@@ -50,6 +50,14 @@ export const purchaseCourse = async (req, res) => {
         }
 
         const newPurchase = await Purchase.create(purchaseData)
+
+        const isAlreadyEnrolled = userData.enrolledCourses.some(courseId => 
+          courseId.toString() === courseData._id.toString()
+        );
+
+        if (isAlreadyEnrolled) {
+          console.log('⚠️ User is already enrolled in this course');
+        } else {
          console.log('📚 Adding user to course enrollment...');
           courseData.enrolledStudents.push(userData._id);
           await courseData.save();
@@ -60,7 +68,7 @@ export const purchaseCourse = async (req, res) => {
           userData.enrolledCourses.push(courseData._id);
           await userData.save();
           console.log('✅ Course added to user enrolled courses');
-
+        }
         // Stripe Gateway Initialize
         const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
 
