@@ -15,7 +15,6 @@ import { ToastContainer } from 'react-toastify'
 import Player from './pages/student/Player'
 import MyEnrollments from './pages/student/MyEnrollments'
 import Loading from './components/student/Loading'
-import QuizGenerator from './components/AI/QuizGenerator'
 import ChatBot from './components/AI/ChatBot'
 import VideoPlayer from './pages/student/VideoPlayer'
 
@@ -37,7 +36,6 @@ const App = () => {
         <Route path="/player/:courseId" element={<Player />} />
         <Route path="/watch/:courseId/:lectureId" element={<VideoPlayer />} />
         <Route path="/loading/:path" element={<Loading />} />
-        <Route path="/quiz-generator" element={<QuizGenerator />} />
         <Route path='/educator' element={<Educator />}>
           <Route path='/educator' element={<Dashboard />} />
           <Route path='add-course' element={<AddCourse />} />

@@ -65,13 +65,6 @@ const Navbar = () => {
               >
                 My Enrollments
               </Link>
-              <span className="text-gray-300">|</span>
-              <Link
-                to="/quiz-generator"
-                className="text-blue-600 font-medium hover:text-blue-700 transition-colors flex items-center gap-1"
-              >
-                <span role="img" aria-label="robot">🤖</span> AI Quiz Generator
-              </Link>
             </>
           )}
         </div>
@@ -104,13 +97,6 @@ const Navbar = () => {
                 className="hover:text-blue-600 transition-colors"
               >
                 My Enrollments
-              </Link>
-              <span className="text-gray-300">|</span>
-              <Link 
-                to="/quiz-generator" 
-                className="text-blue-600 font-medium hover:text-blue-700 transition-colors"
-              >
-                🤖 Quiz
               </Link>
             </>
           )}

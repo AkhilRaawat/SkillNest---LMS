@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Footer from '../../components/student/Footer';
 import { assets } from '../../assets/assets';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
@@ -9,14 +9,17 @@ import humanizeDuration from 'humanize-duration'
 import YouTube from 'react-youtube';
 import { useAuth } from '@clerk/clerk-react';
 import Loading from '../../components/student/Loading';
+import QuizGenerator from '../../components/AI/QuizGenerator';
 
 const CourseDetails = () => {
 
   const { id } = useParams()
+  const navigate = useNavigate();
 
   const [courseData, setCourseData] = useState(null)
   const [playerData, setPlayerData] = useState(null)
   const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false)
+  const [showQuiz, setShowQuiz] = useState(false);
 
   const { backendUrl, currency, userData, calculateChapterTime, calculateCourseDuration, calculateRating, calculateNoOfLectures } = useContext(AppContext)
   const { getToken } = useAuth()
@@ -61,7 +64,7 @@ const CourseDetails = () => {
       }
 
       if (isAlreadyEnrolled) {
-        return toast.warn('Already Enrolled')
+        return navigate(`/player/${courseData._id}`);
       }
 
       const token = await getToken();
@@ -165,6 +168,24 @@ const CourseDetails = () => {
             <p className="rich-text pt-3" dangerouslySetInnerHTML={{ __html: courseData.courseDescription }}>
             </p>
           </div>
+
+          {/* Quiz Generator Section */}
+          <div className="pb-20">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-gray-800">Practice Quiz</h3>
+              <button 
+                onClick={() => setShowQuiz(!showQuiz)}
+                className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                {showQuiz ? 'Hide Quiz' : 'Generate Quiz'}
+              </button>
+            </div>
+            {showQuiz && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <QuizGenerator content={courseData.courseDescription} />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="max-w-course-card z-10 shadow-custom-card rounded-xl overflow-hidden bg-white min-w-[300px] sm:min-w-[420px]">
@@ -220,8 +241,15 @@ const CourseDetails = () => {
                 <p>{calculateNoOfLectures(courseData)} lessons</p>
               </div>
             </div>
-            <button onClick={enrollCourse} className="md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium">
-              {isAlreadyEnrolled ? "Already Enrolled" : "Enroll Now"}
+            <button 
+              onClick={enrollCourse} 
+              className={`md:mt-6 mt-4 w-full py-3 rounded font-medium ${
+                isAlreadyEnrolled 
+                  ? "bg-green-600 hover:bg-green-700" 
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white transition-colors`}
+            >
+              {isAlreadyEnrolled ? "Go to Course" : "Enroll Now"}
             </button>
             <div className="pt-6">
               <p className="md:text-xl text-lg font-medium text-gray-800">What's in the course?</p>

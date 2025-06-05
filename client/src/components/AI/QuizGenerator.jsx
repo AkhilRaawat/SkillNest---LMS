@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './QuizGenerator.css'; // Import your CSS styles for QuizGenerator
 
-const QuizGenerator = () => {
-  const [content, setContent] = useState('');
+const QuizGenerator = ({ content: initialContent }) => {
+  const [content, setContent] = useState(initialContent || '');
   const [settings, setSettings] = useState({
-    questionCount: 10,
+    questionCount: 5,
     difficulty: 'medium',
     questionTypes: ['mcq']
   });
@@ -20,6 +20,12 @@ const QuizGenerator = () => {
   const scoreSummaryRef = useRef(null);
 
   const API_BASE_URL = 'https://skill-nest-lms-server.vercel.app'; // Use the original working URL
+
+  useEffect(() => {
+    if (initialContent) {
+      handleGenerate();
+    }
+  }, [initialContent]);
 
   useEffect(() => {
     // Check if all questions are answered
@@ -56,7 +62,7 @@ const QuizGenerator = () => {
 
   const handleGenerate = async () => {
     if (!content.trim()) {
-      setError('Please enter some content to generate quiz from');
+      setError('No content available to generate quiz');
       return;
     }
 
@@ -65,6 +71,8 @@ const QuizGenerator = () => {
     setQuizGenerated(false);
     setAnsweredQuestions(new Set());
     setSelectedAnswers({});
+    setQuizCompleted(false);
+    setScore({ correct: 0, total: 0, percentage: 0 });
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/ai/generate-quiz`, {
@@ -97,15 +105,18 @@ const QuizGenerator = () => {
     }
   };
 
+  const handleSettingsChange = (key, value) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+    // Generate new quiz with updated settings
+    handleGenerate();
+  };
+
   const handleReset = () => {
-    setContent('');
-    setQuestions([]);
-    setError('');
-    setQuizGenerated(false);
-    setAnsweredQuestions(new Set());
-    setSelectedAnswers({});
-    setQuizCompleted(false);
-    setScore({ correct: 0, total: 0, percentage: 0 });
+    setContent(initialContent || '');
+    handleGenerate();
   };
 
   const handleOptionSelect = (questionIndex, selectedOption) => {
@@ -124,6 +135,35 @@ const QuizGenerator = () => {
   const isQuestionAnswered = (questionIndex) => answeredQuestions.has(questionIndex);
   const getSelectedOption = (questionIndex) => selectedAnswers[questionIndex];
 
+  if (loading) {
+    return (
+      <div className="quiz-loading">
+        <div className="loading-spinner"></div>
+        <p>🧠 Generating your quiz...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="quiz-error">
+        <p>❌ {error}</p>
+        <button onClick={handleGenerate} className="retry-btn">
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!quizGenerated) {
+    return (
+      <div className="quiz-loading">
+        <div className="loading-spinner"></div>
+        <p>Preparing quiz...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="quiz-generator">
       <div className="quiz-generator-header">
@@ -131,191 +171,142 @@ const QuizGenerator = () => {
         <p>Generate intelligent quizzes from any content using AI</p>
       </div>
 
-      {!quizGenerated ? (
-        <div className="quiz-input-section">
-          <div className="content-input">
-            <label htmlFor="content">Enter Course Content:</label>
-            <textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Paste your lecture notes, textbook content, or any educational material here..."
-              rows={8}
-              className="content-textarea"
-            />
-            <div className="content-counter">
-              {content.length} characters
+      <div className="quiz-results">
+        <div className="results-header">
+          <div>
+            <h3>🎯 Practice Quiz ({questions.length} questions)</h3>
+            <div className="quiz-settings mt-4">
+              <div className="settings-row">
+                <div className="setting-group">
+                  <label htmlFor="questionCount">Number of Questions:</label>
+                  <select
+                    id="questionCount"
+                    value={settings.questionCount}
+                    onChange={(e) => handleSettingsChange('questionCount', parseInt(e.target.value))}
+                    className="quiz-select"
+                  >
+                    <option value={3}>3 Questions</option>
+                    <option value={5}>5 Questions</option>
+                    <option value={10}>10 Questions</option>
+                    <option value={15}>15 Questions</option>
+                  </select>
+                </div>
+                <div className="setting-group">
+                  <label htmlFor="difficulty">Difficulty:</label>
+                  <select
+                    id="difficulty"
+                    value={settings.difficulty}
+                    onChange={(e) => handleSettingsChange('difficulty', e.target.value)}
+                    className="quiz-select"
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+              <button className="generate-quiz-btn" onClick={handleReset}>
+                Generate Quiz
+              </button>
             </div>
           </div>
+        </div>
 
-          <div className="quiz-settings">
-            <h3>Quiz Settings</h3>
+        {quizCompleted && (
+          <div className="score-summary" ref={scoreSummaryRef}>
+            <div className="score-header">
+              <h3>{getPerformanceMessage(score.percentage)}</h3>
+              <div className="score-stats">
+                <div className="score-circle">
+                  <div className="score-percentage">{score.percentage}%</div>
+                  <div className="score-label">Score</div>
+                </div>
+                <div className="score-details">
+                  <div className="score-item">
+                    <span>✅ Correct:</span> {score.correct}
+                  </div>
+                  <div className="score-item">
+                    <span>❌ Incorrect:</span> {score.total - score.correct}
+                  </div>
+                  <div className="score-item">
+                    <span>📝 Total Questions:</span> {score.total}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="questions-list">
+          {questions.map((question, index) => {
+            const isAnswered = isQuestionAnswered(index);
+            const selectedOption = getSelectedOption(index);
             
-            <div className="settings-row">
-              <div className="setting-group">
-                <label htmlFor="questionCount">Number of Questions:</label>
-                <select
-                  id="questionCount"
-                  value={settings.questionCount}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    questionCount: parseInt(e.target.value)
-                  }))}
-                >
-                  <option value={3}>3 Questions</option>
-                  <option value={5}>5 Questions</option>
-                  <option value={10}>10 Questions</option>
-                  <option value={15}>15 Questions</option>
-                  <option value={20}>20 Questions</option>
-                </select>
-              </div>
-
-              <div className="setting-group">
-                <label htmlFor="difficulty">Difficulty Level:</label>
-                <select
-                  id="difficulty"
-                  value={settings.difficulty}
-                  onChange={(e) => setSettings(prev => ({
-                    ...prev,
-                    difficulty: e.target.value
-                  }))}
-                >
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <button 
-            className="generate-btn"
-            onClick={handleGenerate} 
-            disabled={loading || !content.trim()}
-          >
-            {loading ? '🧠 Generating Quiz...' : '✨ Generate Quiz with AI'}
-          </button>
-
-          {error && <div className="error-message">❌ {error}</div>}
-        </div>
-      ) : (
-        <div className="quiz-results">
-          <div className="results-header">
-            <h3>🎯 Generated Quiz ({questions.length} questions)</h3>
-            <button className="new-quiz-btn" onClick={handleReset}>
-              + Generate New Quiz
-            </button>
-          </div>
-
-          {quizCompleted && (
-            <div className="score-summary" ref={scoreSummaryRef}>
-              <div className="score-header">
-                <h3>{getPerformanceMessage(score.percentage)}</h3>
-                <div className="score-stats">
-                  <div className="score-circle">
-                    <div className="score-percentage">{score.percentage}%</div>
-                    <div className="score-label">Score</div>
-                  </div>
-                  <div className="score-details">
-                    <div className="score-item">
-                      <span>✅ Correct:</span> {score.correct}
-                    </div>
-                    <div className="score-item">
-                      <span>❌ Incorrect:</span> {score.total - score.correct}
-                    </div>
-                    <div className="score-item">
-                      <span>📝 Total Questions:</span> {score.total}
-                    </div>
-                  </div>
+            return (
+              <div key={index} className="question-card">
+                <div className="question-header">
+                  <span className="question-number">Q{index + 1}</span>
+                  <span className="difficulty-badge">{question.difficulty}</span>
                 </div>
-              </div>
-              <div className="score-actions">
-                <button 
-                  className="review-questions-btn"
-                  onClick={() => {
-                    window.scrollTo({
-                      top: document.querySelector('.questions-list').offsetTop,
-                      behavior: 'smooth'
-                    });
-                  }}
-                >
-                  📝 Review Questions
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="questions-list">
-            {questions.map((question, index) => {
-              const isAnswered = isQuestionAnswered(index);
-              const selectedOption = getSelectedOption(index);
-              
-              return (
-                <div key={index} className="question-card">
-                  <div className="question-header">
-                    <span className="question-number">Q{index + 1}</span>
-                    <span className="difficulty-badge">{question.difficulty}</span>
-                  </div>
-                  
-                  <div className="question-text">
-                    {question.question}
-                  </div>
-
-                  {question.options && (
-                    <div className="options-list">
-                      {question.options.map((option, optIndex) => {
-                        const isSelected = selectedOption === option;
-                        const isCorrect = isAnswered && option === question.correct_answer;
-                        
-                        return (
-                          <div 
-                            key={optIndex} 
-                            className={`option 
-                              ${!isAnswered ? 'clickable' : ''}
-                              ${isSelected ? 'selected' : ''}
-                              ${isAnswered && isSelected ? (isCorrect ? 'correct' : 'incorrect') : ''}
-                              ${isAnswered && isCorrect ? 'correct' : ''}`}
-                            onClick={() => handleOptionSelect(index, option)}
-                          >
-                            <span className={`option-letter ${isAnswered && (isSelected || isCorrect) ? (isCorrect ? 'correct' : 'incorrect') : ''}`}>
-                              {String.fromCharCode(65 + optIndex)}
-                            </span>
-                            <span className="option-text">{option}</span>
-                            {isAnswered && (
-                              isCorrect ? (
-                                <span className="correct-indicator">✓</span>
-                              ) : (
-                                isSelected && <span className="incorrect-indicator">✗</span>
-                              )
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {isAnswered && (
-                    <div className="feedback-section">
-                      <div className="result-message">
-                        {selectedOption === question.correct_answer ? (
-                          <div className="correct-message">✨ Correct!</div>
-                        ) : (
-                          <div className="incorrect-message">
-                            ❌ Incorrect
-                          </div>
-                        )}
-                      </div>
-                      <div className="explanation">
-                        <strong>💡 Explanation:</strong> {question.explanation}
-                      </div>
-                    </div>
-                  )}
+                
+                <div className="question-text">
+                  {question.question}
                 </div>
-              );
-            })}
-          </div>
+
+                {question.options && (
+                  <div className="options-list">
+                    {question.options.map((option, optIndex) => {
+                      const isSelected = selectedOption === option;
+                      const isCorrect = isAnswered && option === question.correct_answer;
+                      
+                      return (
+                        <div 
+                          key={optIndex} 
+                          className={`option 
+                            ${!isAnswered ? 'clickable' : ''}
+                            ${isSelected ? 'selected' : ''}
+                            ${isAnswered && isSelected ? (isCorrect ? 'correct' : 'incorrect') : ''}
+                            ${isAnswered && isCorrect ? 'correct' : ''}`}
+                          onClick={() => handleOptionSelect(index, option)}
+                        >
+                          <span className={`option-letter ${isAnswered && (isSelected || isCorrect) ? (isCorrect ? 'correct' : 'incorrect') : ''}`}>
+                            {String.fromCharCode(65 + optIndex)}
+                          </span>
+                          <span className="option-text">{option}</span>
+                          {isAnswered && (
+                            isCorrect ? (
+                              <span className="correct-indicator">✓</span>
+                            ) : (
+                              isSelected && <span className="incorrect-indicator">✗</span>
+                            )
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {isAnswered && (
+                  <div className="feedback-section">
+                    <div className="result-message">
+                      {selectedOption === question.correct_answer ? (
+                        <div className="correct-message">✨ Correct!</div>
+                      ) : (
+                        <div className="incorrect-message">
+                          ❌ Incorrect
+                        </div>
+                      )}
+                    </div>
+                    <div className="explanation">
+                      <strong>💡 Explanation:</strong> {question.explanation}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 };
