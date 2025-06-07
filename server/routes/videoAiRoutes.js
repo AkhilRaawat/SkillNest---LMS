@@ -15,7 +15,7 @@ const videoAiRouter = express.Router();
 // Health check
 videoAiRouter.get('/health', healthCheck);
 
-// Showcase initialization (run once to seed data)
+// Showcase initialization 
 videoAiRouter.post('/initialize-showcase', initializeShowcaseData);
 
 // Get available videos for showcase
