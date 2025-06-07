@@ -239,10 +239,6 @@ Need help? We're here for you!
 <div align="center">
 
 ### ⭐ **Star this repo if you found it helpful!**
-
-[![Stars](https://img.shields.io/github/stars/yourusername/skillnest-lms?style=social)](https://github.com/AkhilRaawat/skillnest-lms/stargazers)
-[![Forks](https://img.shields.io/github/forks/yourusername/skillnest-lms?style=social)](https://github.com/AkhilRaawat/skillnest-lms/network/members)
-
 **Made with 💻 and ☕ | © 2025 SkillNest LMS**
 
 </div>
