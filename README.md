@@ -209,8 +209,6 @@ MONGODB_URI=your_mongodb_connection
 
 ## 🤝 **Contributing**
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
@@ -219,20 +217,11 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ---
 
-## 📄 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👥 **Team**
-
-<div align="center">
 
 **Built with ❤️ by the SkillNest Team**
 
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=for-the-badge&logo=github)](https://github.com/yourusername)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/yourprofile)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=for-the-badge&logo=github)](https://github.com/AkhilRaawat)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/akhil-rawat)
 
 </div>
 
@@ -242,9 +231,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Need help? We're here for you!
 
-- 📧 **Email**: support@skillnest-lms.tech
-- 💬 **Discord**: [Join our community](https://discord.gg/skillnest)
-- 📖 **Documentation**: [View full docs](https://docs.skillnest-lms.tech)
+- 📧 **Email**: akhilrawat155@gmail.com
 - 🐛 **Bug Reports**: [Create an issue](https://github.com/yourusername/skillnest-lms/issues)
 
 ---
@@ -253,8 +240,8 @@ Need help? We're here for you!
 
 ### ⭐ **Star this repo if you found it helpful!**
 
-[![Stars](https://img.shields.io/github/stars/yourusername/skillnest-lms?style=social)](https://github.com/yourusername/skillnest-lms/stargazers)
-[![Forks](https://img.shields.io/github/forks/yourusername/skillnest-lms?style=social)](https://github.com/yourusername/skillnest-lms/network/members)
+[![Stars](https://img.shields.io/github/stars/yourusername/skillnest-lms?style=social)](https://github.com/AkhilRaawat/skillnest-lms/stargazers)
+[![Forks](https://img.shields.io/github/forks/yourusername/skillnest-lms?style=social)](https://github.com/AkhilRaawat/skillnest-lms/network/members)
 
 **Made with 💻 and ☕ | © 2025 SkillNest LMS**
 
